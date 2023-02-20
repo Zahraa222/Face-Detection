@@ -1,0 +1,473 @@
+/*
+****************************************************
+TESTING OPEN CV
+****************************************************
+
+
+
+LIBRARIES:
+
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <iostream>
+
+using namespace cv;
+using namespace std;
+------------------------------------------------------------------------
+
+
+
+
+
+					READ IMAGES, VIDEOS, WEBCAMS
+
+
+
+------------------------------------------------------------------------
+defining path:
+string path = "file directoy";
+
+Reading images:
+Mat img = imread(path)
+
+Reading videos:
+VideoCapture variable(path);
+
+Reading WebCam:
+VideoCapture(0); //main device cam path == 0, if 2nd cam is attached, path == 1, etc.
+
+------------------------------------------------------------------------------------------------
+
+
+//								Importing Images
+
+
+void main() {
+	string path = "Resources/test.png"; //defining path, sample image 'test'
+	Mat img = imread(path); //Mat: matrix datatype in openCV to handle all the images
+	imshow("Image", img); //shows image and exits automatically
+	waitKey(0); // 0 == infinity, image will not clost unless we hit the close button
+}
+
+
+
+-----------------------------------------------------------------------------------------------------
+
+
+//								Importing Videos
+
+
+void main() {
+
+	string path = "Resources/test_video.mp4"; //defining path, sample video 'test_video'
+	VideoCapture cap(path);
+	Mat img;
+
+	while (true) { //capturing an diplaying each frame in the video
+
+		cap.read(img);
+		imshow("Image", img);
+		waitKey(30); // 30ms time delay
+	}
+}
+
+
+---------------------------------------------------------------------------
+
+
+//							Importing Webcam
+
+
+void main() {
+
+	VideoCapture cap(0); // 0 is the computer's camera path
+	Mat img;
+
+	while (true) { //capturing an diplaying each frame in the video
+
+		cap.read(img);
+		imshow("Image", img);
+		waitKey(1); // 1ms time delay
+	}
+}
+-----------------------------------------------------------------------------------------
+
+
+
+								BASIC FUNCTIONS
+
+
+
+-----------------------------------------------------------------------------------------------
+
+openCV color convention: BGR (Blue, Green, Red)
+
+to convert image color to gray:
+Mat imgGray;
+cvtColor(img, imgGray, COLOR_BGR2GRAY);
+
+
+Blurring an Image:
+Mat imgBlur;
+GaussianBlur(img, imgBlur,Size(7,7),5,0); //format: (original Image, Final Image, Size(odd#,odd#), blurr intensity,0)
+
+
+Detects edges in an image
+Mat imgBlur, imgCanny;
+Canny(imgBlur,imgCanny,25,125); //format: image(usually blurred), final image, number,number) **smaller numbers=more edges/lines
+
+
+Dilating an image (thickening edges):
+Mat kernel = getStructuringElement(MORPH_RECT, Size(5, 5)); //creates a kernel used for dialation&erosion, increased size --> increased dilation (vice versa) SIZE MUST BE ODD NUMBERS
+dilate(imgCanny, imgDia, kernel); 
+
+Eroding an image:
+Mat kernel = getStructuringElement(MORPH_RECT, Size(5, 5)); //creates a kernel used for dialation&erosion, increased size --> increased dilation (vice versa) SIZE MUST BE ODD NUMBERS
+erode(imgDia, imgErode, kernel); //format: (dilated image, new image, kernel)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+void main() {
+	string path = "Resources/test.png";
+	Mat img = imread(path);
+	Mat imgGray, imgBlur,imgCanny, imgDia, imgErode;
+
+	cvtColor(img, imgGray, COLOR_BGR2GRAY);//converting image to gray color
+	GaussianBlur(img, imgBlur,Size(7,7),5,0); //blurrs image
+	Canny(imgBlur,imgCanny,25,125); //detects edges in an image
+
+	Mat kernel = getStructuringElement(MORPH_RECT, Size(5, 5)); //creates a kernel used for dialation, increased size --> increased dilation (vice versa) SIZE MUST BE ODD NUMBERS
+	dilate(imgCanny, imgDia, kernel); //thickness in edges
+	erode(imgDia, imgErode, kernel);
+
+
+	imshow("Image", img);
+	waitKey(0);
+	imshow("Image Gray", imgGray);
+	waitKey(0);
+	imshow("Image Blur", imgBlur);
+	waitKey(0);
+	imshow("Image Canny", imgCanny);
+	waitKey(0);
+	imshow("Image Dilation", imgDia);
+	waitKey(0);
+	imshow("Image Erode", imgErode);
+	waitKey(0);
+}
+-------------------------------------------------------------------------------------------------------------
+
+
+
+										RESIZE & CROP IMAGES
+
+
+
+-------------------------------------------------------------------------------------------------------------
+
+Finding size of the image:
+cout << img.size() << endl;
+
+
+Resizing Image by exact dimesions:
+resize(img, New Image, Size(x,y));
+
+Resizing Image to by size ratios:
+resize(img, New Image, Size(), double x, double y);
+
+
+Cropping Image:
+Mat NewImg
+Rect variable(x, y, width, height);
+NewImg = img(variable)
+
+
+
+
+
+
+
+
+
+void main(){
+	string path = "Resources/test.png";
+	Mat img = imread(path);
+	Mat imgResize, imgCrop;
+
+	cout << img.size() << endl; //outputs image size: (768 x 559)
+
+	//resize(img, imgResize,Size(600,200)); //resizes to a specific value
+	resize(img, imgResize, Size(),0.5,0.5); // changes size ratio (x,y)
+
+	Rect roi(100, 100, 300, 250); //variables(x,y,width,height)
+	imgCrop = img(roi);
+
+	imshow("Image", img);
+	waitKey(0);
+	imshow("Image Resize", imgResize);
+	waitKey(0);
+	imshow("Image Resize", imgCrop);
+	waitKey(0);
+}
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+											DRAWING SHAPES AND TEXT
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+
+Drawing a blank Image:
+Mat img(Width, Height, CV_8UC3, Scalar(B,R,G)); //[8 stands for 8bits/pixel, 3 stands for 3 elements(BRG)
+
+Drawing Circle:
+circle(img, Center point [Point(x,y)], Radius, Scalar(B, R, G), thickness (1-FILLED);
+
+Drawing a Rectangle:
+rectangle(img, Starting pt (x, y), end pt(x, y), Scalar(B, R, G), 1-FILLED);
+
+
+Drawing Line:
+line(img, Starting pt (x, y), end pt(x, y), Scalar(B, R, G), 1-FILLED);
+
+
+Writing Text:
+putText(img, "INSERT TEXT HERE", Point(x, y), FONT, 2, Scalar(B, R, G), thickness);
+
+
+
+
+void main() {
+	//Blank Image
+
+	Mat img(512, 512, CV_8UC3, Scalar(255,255,255));//CV_8 means each pixel has 8 bits (0-255) UC =unsigned 3 = BGR
+
+	circle(img, Point(256, 256), 155, Scalar(0, 69, 255), FILLED);//last parameter shows thickness of border (center pt, radius, color, thickness ranging from 1-FILLED)
+	rectangle(img, Point(130, 226), Point(382, 286), Scalar(255, 255, 255), FILLED);//pt(x,y,),x1,y1
+	line(img, Point(130, 296), Point(382, 450), Scalar(255, 0, 255), 2);
+
+	putText(img, "HELLO!", Point(137, 262), FONT_HERSHEY_DUPLEX, 2, Scalar(0, 69, 255), 7);
+	imshow("Image", img);
+	waitKey(0);
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+											WARP PERSPECTIVE
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+WARPING: Bird's eye view, looking at the picture from a different perspective (as if you're on top of the object in the image"
+
+
+
+
+float w = 250, h = 350;
+
+Mat Matrix, imgWarp;
+
+void main() {
+	string path = "Resources/cards.jpg";
+	Mat img = imread(path);
+
+	Point2f src[4] = { {529,142},{771,190},{405,395},{674,457} };
+	Point2f dst[4] = { {0.0f,0.0f},{w,0.0f},{0.0f,h},{w,h} };
+
+	Matrix = getPerspectiveTransform(src, dst);
+	warpPerspective(img, imgWarp, Matrix, Point(w, h));
+
+
+	//Labeling chosen points in original Image
+	for (int i = 0; i < 4; i++) {
+		circle(img, src[i], 5, Scalar(0, 69, 255), FILLED);
+	}
+
+	imshow("Image", img);
+	waitKey(0);
+	imshow("Image", imgWarp);
+	waitKey(0);
+}
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+											COLOR DETECTION
+
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+Mat imgHSV, mask;
+int hmin = 0, smin = 110, vmin = 153;
+int hmax = 19, smax = 240, vmax = 255;
+
+
+void main() {
+	string path = "Resources/lambo.png";
+	Mat img = imread(path);
+	cvtColor(img, imgHSV, COLOR_BGR2HSV); //changing to hue saturation values instead of BRG
+
+	namedWindow("TrackBars", (640, 200));
+	//bars that adjust the saturation of the mask image to identify values of original image
+	createTrackbar("Hue Min", "TrackBars", &hmin, 179);
+	createTrackbar("Hue Max", "TrackBars", &hmax, 179);
+	createTrackbar("Hue Min", "TrackBars", &smin, 255);
+	createTrackbar("Hue Max", "TrackBars", &smax, 255);
+	createTrackbar("Hue Min", "TrackBars", &vmin, 255);
+	createTrackbar("Hue Max", "TrackBars", &vmax, 255);
+
+
+	while (true) {
+	Scalar lower(hmin, smin, vmin);
+	Scalar upper(hmax, smax, vmax);
+	inRange(imgHSV, lower, upper, mask);
+
+	imshow("Image", imgHSV);
+	waitKey(1000);
+	imshow("Image", mask);
+	waitKey(1);
+	}
+
+
+}
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+								SHAPES/CONTOUR DETECTION
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+First find edges using Canny edge detector, then find contour points
+
+//Dilation is better at detecting shapes since it fills in the missing gaps in the canny edge detector
+
+
+
+
+void getContours(Mat imgDia, Mat img) {
+
+	//a contour vector that has a vector that has points
+	vector<vector<Point>> contours;
+	//hierarchy is a vactor that has a vecot rof 4 points
+	vector<Vec4i> hierarchy;
+	findContours(imgDia, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+	drawContours(img, contours, -1, Scalar(255, 0, 255), 2);
+
+
+	for (int i = 0; i << contours.size(); i++) {
+		int area = contourArea(contours[i]);
+		cout << area << endl;
+	}
+
+}
+
+
+
+void main() {
+	string path = "Resources/shapes.png";
+	Mat img = imread(path);
+	Mat imgGray, imgBlur, imgCanny, imgDia, imgErode;
+
+
+	//Preprocessing
+	cvtColor(img, imgGray, COLOR_BGR2GRAY);//converting image to gray color
+	GaussianBlur(imgGray, imgBlur, Size(7, 7), 5, 0); //blurrs image
+	Canny(imgBlur, imgCanny, 25, 125); //detects edges in an image
+	Mat kernel = getStructuringElement(MORPH_RECT, Size(5, 5)); //creates a kernel used for dialation, increased size --> increased dilation (vice versa) SIZE MUST BE ODD NUMBERS
+	dilate(imgCanny, imgDia, kernel); //thickness in edges
+
+	getContours(imgDia, img);
+
+
+	imshow("Image", img);
+	waitKey(0);
+	imshow("Image Gray", imgGray);
+	waitKey(0);
+	imshow("Image Blur", imgBlur);
+	waitKey(0);
+	imshow("Image Canny", imgCanny);
+	waitKey(0);
+	imshow("Image Dilation", imgDia);
+	waitKey(0);
+}
+--------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+									FACE DETECTION
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------
+ADD THIS!!
+
+#include<opencv2/objdetect.hpp>
+
+***********************************************************
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include<opencv2/objdetect.hpp>
+#include <iostream>
+
+using namespace cv;
+using namespace std;
+
+
+void main() {
+	string path = "Resources/Zahraa.jpg";
+	Mat img = imread(path);
+	resize(img, img, Size(), 0.5, 0.5);
+
+	CascadeClassifier faceCascade;
+	faceCascade.load("Resources/haarcascade_frontalface_default.xml");
+
+	if (faceCascade.empty()) { cout << "XML file not loaded" << endl; }
+
+	vector<Rect> faces;
+	faceCascade.detectMultiScale(img, faces, 1.1, 10);
+
+	for (int i = 0; i < faces.size(); i++){
+
+		rectangle(img, faces[i].tl(), faces[i].br(), Scalar(0, 0, 255), 3); //tl: top left of the face, br: bottom right of the face
+
+	}
+
+	imshow("Image", img);
+	waitKey(0);
+}
+*/
+
+
+
+
